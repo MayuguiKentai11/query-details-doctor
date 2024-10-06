@@ -1,0 +1,34 @@
+﻿version: "3"
+services:
+  recipes-doctor.api:
+    image: recipes-doctor.api:latest
+    build:
+      context: .
+      dockerfile: RecipesDoctor.API/Dockerfile
+    ports:
+      - "5000:5000"
+    environment: 
+      DefaultConnection: Server=recipes-doctor_mysql;User=root;Password=password;Database=db_doctor
+      ASPNETCORE_ENVIRONMENT: Development
+    restart: always
+    depends_on: 
+      recipes-doctor_mysql:
+        condition: service_healthy
+  recipes-doctor_mysql:
+    image: 'mysql:latest'
+    ports: 
+    - "3307:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: password
+        MYSQL_PASSWORD: password
+        MYSQL_DATABASE: db_doctor
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+volumes:
+  mysql_data:
+      
